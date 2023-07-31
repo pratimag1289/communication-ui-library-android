@@ -23,21 +23,16 @@ import java.util.UUID
 
 class CallLauncherViewModel : ViewModel() {
 
-    fun launch(
-        context: Context,
-        acsToken: String,
-        displayName: String,
-        groupId: UUID?,
-        meetingLink: String?,
-    ) {
-        val callComposite = createCallComposite(context)
-        callComposite.addOnErrorEventHandler(CallLauncherActivityErrorHandler(context, callComposite))
+    var callComposite: CallComposite? = null
+    private var remoteOptions: CallCompositeRemoteOptions? = null
 
-        if (SettingsFeatures.getRemoteParticipantPersonaInjectionSelection()) {
-            callComposite.addOnRemoteParticipantJoinedEventHandler(
-                RemoteParticipantJoinedHandler(callComposite, context)
-            )
-        }
+    fun initCallComposite(        context: Context,
+                                  acsToken: String,
+                                  displayName: String,
+                                  groupId: UUID?,
+                                  meetingLink: String?,) {
+
+         callComposite = createCallComposite(context)
 
         val communicationTokenRefreshOptions =
             CommunicationTokenRefreshOptions({ acsToken }, true)
@@ -48,8 +43,22 @@ class CallLauncherViewModel : ViewModel() {
             if (groupId != null) CallCompositeGroupCallLocator(groupId)
             else CallCompositeTeamsMeetingLinkLocator(meetingLink)
 
-        val remoteOptions =
+        remoteOptions =
             CallCompositeRemoteOptions(locator, communicationTokenCredential, displayName)
+
+    }
+
+    fun launch(
+        context: Context
+    ) {
+        callComposite!!.addOnErrorEventHandler(CallLauncherActivityErrorHandler(context, callComposite!!))
+
+        if (SettingsFeatures.getRemoteParticipantPersonaInjectionSelection()) {
+            callComposite?.addOnRemoteParticipantJoinedEventHandler(
+                RemoteParticipantJoinedHandler(callComposite!!, context)
+            )
+        }
+
 
         val localOptions = CallCompositeLocalOptions()
             .setParticipantViewData(SettingsFeatures.getParticipantViewData(context.applicationContext))
@@ -62,7 +71,7 @@ class CallLauncherViewModel : ViewModel() {
             .setCameraOn(SettingsFeatures.getCameraOnByDefaultOption())
             .setMicrophoneOn(SettingsFeatures.getMicOnByDefaultOption())
 
-        callComposite.launch(context, remoteOptions, localOptions)
+        callComposite?.launch(context, remoteOptions, localOptions)
     }
 
     fun getCallHistory(context: Context): List<CallCompositeCallHistoryRecord> {

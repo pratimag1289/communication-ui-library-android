@@ -94,6 +94,7 @@
             />
 
         <LinearLayout
+            android:id="@+id/appVersion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -118,5 +119,15 @@
                 android:textSize="14sp"
                 />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/initCallingSDK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Init"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appVersion"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -6,11 +6,14 @@ package com.azure.android.communication.ui.calling;
 import android.content.Context;
 import android.content.Intent;
 
+import com.azure.android.communication.calling.CallAgent;
+import com.azure.android.communication.calling.CallClient;
 import com.azure.android.communication.common.CommunicationIdentifier;
 import com.azure.android.communication.ui.calling.configuration.CallCompositeConfiguration;
 import com.azure.android.communication.ui.calling.configuration.CallConfiguration;
 import com.azure.android.communication.ui.calling.configuration.CallType;
 import com.azure.android.communication.ui.calling.di.DependencyInjectionContainer;
+import com.azure.android.communication.ui.calling.di.ServiceWrapperDependencyContainer;
 import com.azure.android.communication.ui.calling.models.CallCompositeDebugInfo;
 import com.azure.android.communication.ui.calling.models.CallCompositeGroupCallLocator;
 import com.azure.android.communication.ui.calling.models.CallCompositeJoinLocator;
@@ -56,6 +59,8 @@ public final class CallComposite {
     private static int instanceId = 0;
 
     private final CallCompositeConfiguration configuration;
+
+    private ServiceWrapperDependencyContainer serviceWrapperDependencyContainer = null;
     private WeakReference<DependencyInjectionContainer> diContainer;
 
     CallComposite(final CallCompositeConfiguration configuration) {
@@ -87,6 +92,50 @@ public final class CallComposite {
      */
     public void launch(final Context context, final CallCompositeRemoteOptions remoteOptions) {
         launch(context, remoteOptions, null);
+    }
+
+    public CallClient getCallClient(final Context context,
+                                    final CallCompositeRemoteOptions remoteOptions) {
+        if (diContainer != null) {
+            final DependencyInjectionContainer container = diContainer.get();
+            if (container != null) {
+                if (serviceWrapperDependencyContainer == null) {
+                    UUID groupId = null;
+                    String meetingLink = null;
+                    final CallType callType;
+
+                    final CallCompositeJoinLocator locator = remoteOptions.getLocator();
+                    if (locator instanceof CallCompositeGroupCallLocator) {
+                        callType = CallType.GROUP_CALL;
+                        groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
+                    } else {
+                        callType = CallType.TEAMS_MEETING;
+                        meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
+                    }
+
+                    configuration.setCallConfig(new CallConfiguration(
+                            remoteOptions.getCredential(),
+                            remoteOptions.getDisplayName(),
+                            groupId,
+                            meetingLink,
+                            callType));
+
+                    serviceWrapperDependencyContainer = new ServiceWrapperDependencyContainer(context, this);
+                }
+                return container.getCallingSDKWrapperNative().getCallClient();
+            }
+        }
+        return null;
+    }
+
+    public CallAgent getCallAgent() {
+        if (diContainer != null) {
+            final DependencyInjectionContainer container = diContainer.get();
+            if (container != null) {
+                return container.getCallingSDKWrapperNative().getCallAgent();
+            }
+        }
+        return null;
     }
 
     /**
@@ -241,25 +290,29 @@ public final class CallComposite {
                             final boolean isTest) {
         AndroidThreeTen.init(context.getApplicationContext());
 
-        UUID groupId = null;
-        String meetingLink = null;
-        final CallType callType;
+        if (serviceWrapperDependencyContainer == null) {
+            UUID groupId = null;
+            String meetingLink = null;
+            final CallType callType;
 
-        final CallCompositeJoinLocator locator = remoteOptions.getLocator();
-        if (locator instanceof CallCompositeGroupCallLocator) {
-            callType = CallType.GROUP_CALL;
-            groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
-        } else {
-            callType = CallType.TEAMS_MEETING;
-            meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
+            final CallCompositeJoinLocator locator = remoteOptions.getLocator();
+            if (locator instanceof CallCompositeGroupCallLocator) {
+                callType = CallType.GROUP_CALL;
+                groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
+            } else {
+                callType = CallType.TEAMS_MEETING;
+                meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
+            }
+
+            configuration.setCallConfig(new CallConfiguration(
+                    remoteOptions.getCredential(),
+                    remoteOptions.getDisplayName(),
+                    groupId,
+                    meetingLink,
+                    callType));
+
+            serviceWrapperDependencyContainer = new ServiceWrapperDependencyContainer(context, this);
         }
-
-        configuration.setCallConfig(new CallConfiguration(
-                remoteOptions.getCredential(),
-                remoteOptions.getDisplayName(),
-                groupId,
-                meetingLink,
-                callType));
 
         if (localOptions != null) {
             configuration.setCallCompositeLocalOptions(localOptions);
@@ -283,5 +336,9 @@ public final class CallComposite {
                     final CallCompositeRemoteOptions remoteOptions,
                     final CallCompositeLocalOptions localOptions) {
         launchComposite(context, remoteOptions, localOptions, true);
+    }
+
+    public ServiceWrapperDependencyContainer getServiceWrapperDependencyContainer() {
+        return serviceWrapperDependencyContainer;
     }
 }

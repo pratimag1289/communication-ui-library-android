@@ -61,11 +61,15 @@ internal class DependencyInjectionContainerImpl(
     override val callComposite: CallComposite,
     private val customCallingSDK: CallingSDK?,
     private val customVideoStreamRendererFactory: VideoStreamRendererFactory?,
-    private val customCoroutineContextProvider: CoroutineContextProvider?
+    private val customCoroutineContextProvider: CoroutineContextProvider?,
 ) : DependencyInjectionContainer {
 
     override val configuration by lazy {
         callComposite.getConfig()
+    }
+
+    private val serviceWrapperDependencyContainer by lazy {
+        callComposite.serviceWrapperDependencyContainer
     }
 
     override val navigationRouter by lazy {
@@ -237,18 +241,10 @@ internal class DependencyInjectionContainerImpl(
 
     private val callingSDKWrapper: CallingSDK by lazy {
         customCallingSDK
-            ?: CallingSDKWrapper(
-                applicationContext,
-                callingSDKEventHandler,
-                configuration.callConfig
-            )
+            ?: callingSDKWrapperNative
     }
 
-    private val callingSDKEventHandler by lazy {
-        CallingSDKEventHandler(
-            coroutineContextProvider
-        )
-    }
+    override val callingSDKWrapperNative: CallingSDKWrapper by lazy { serviceWrapperDependencyContainer.callingSDKWrapperNative }
 
     private val callingService by lazy {
         CallingService(callingSDKWrapper, coroutineContextProvider)

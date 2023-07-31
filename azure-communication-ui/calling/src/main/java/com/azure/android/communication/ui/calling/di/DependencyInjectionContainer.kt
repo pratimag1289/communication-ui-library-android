@@ -25,6 +25,7 @@ import com.azure.android.communication.ui.calling.redux.middleware.handler.Calli
 import com.azure.android.communication.ui.calling.redux.state.ReduxState
 import com.azure.android.communication.ui.calling.service.CallHistoryService
 import com.azure.android.communication.ui.calling.service.NotificationService
+import com.azure.android.communication.ui.calling.service.sdk.CallingSDKWrapper
 
 // Dependency Container for the Call Composite Activity
 // For implementation
@@ -37,6 +38,7 @@ internal interface DependencyInjectionContainer {
     val callingMiddlewareActionHandler: CallingMiddlewareActionHandler
 
     val callComposite: CallComposite
+    val callingSDKWrapperNative: CallingSDKWrapper
 
     // Config
     val configuration: CallCompositeConfiguration

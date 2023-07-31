@@ -44,7 +44,8 @@ internal class CallingSDKWrapper(
     private val logger: Logger? = null,
 ) : CallingSDK {
     private var nullableCall: Call? = null
-    private var callClient: CallClient? = null
+    var callClient: CallClient? = null
+    var callAgent: CallAgent? = null;
 
     private var callAgentCompletableFuture: CompletableFuture<CallAgent>? = null
     private var deviceManagerCompletableFuture: CompletableFuture<DeviceManager>? = null
@@ -152,6 +153,7 @@ internal class CallingSDKWrapper(
                 it.setTags(callConfig.diagnosticConfig.tags, logger)
             }
             callClient = CallClient(callClientOptions)
+            createCallAgent()
         }
         createDeviceManager().handle { _, error: Throwable? ->
             if (error != null) {
@@ -316,6 +318,7 @@ internal class CallingSDKWrapper(
                     if (error != null) {
                         callAgentCompletableFuture!!.completeExceptionally(error)
                     } else {
+                        this.callAgent = callAgent
                         callAgentCompletableFuture!!.complete(callAgent)
                     }
                 }

@@ -6,6 +6,7 @@ package com.azure.android.communication.ui.callingcompositedemoapp
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
@@ -15,12 +16,17 @@ import com.azure.android.communication.ui.callingcompositedemoapp.databinding.Ac
 import com.azure.android.communication.ui.callingcompositedemoapp.features.AdditionalFeatures
 import com.azure.android.communication.ui.callingcompositedemoapp.features.FeatureFlags
 import com.azure.android.communication.ui.callingcompositedemoapp.features.conditionallyRegisterDiagnostics
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import com.microsoft.appcenter.distribute.Distribute
+/*
+import com.microsoft.windowsazure.messaging.notificationhubs.NotificationHub
+*/
+import java.util.*
 import org.threeten.bp.format.DateTimeFormatter
-import java.util.UUID
 
 class CallLauncherActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCallLauncherBinding
@@ -48,6 +54,19 @@ class CallLauncherActivity : AppCompatActivity() {
         binding = ActivityCallLauncherBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FirebaseTest ", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.d("FirebaseTest ", token)
+        })
+        
         val data: Uri? = intent?.data
         val deeplinkAcsToken = data?.getQueryParameter("acstoken")
         val deeplinkName = data?.getQueryParameter("name")
@@ -100,6 +119,10 @@ class CallLauncherActivity : AppCompatActivity() {
                 showCallHistory()
             }
 
+            initCallingSDK.setOnClickListener {
+                initCallingSDK()
+            }
+
             if (BuildConfig.DEBUG) {
                 versionText.text = "${BuildConfig.VERSION_NAME}"
             } else {
@@ -124,7 +147,7 @@ class CallLauncherActivity : AppCompatActivity() {
         }
     }
 
-    private fun launch() {
+    private fun initCallingSDK() {
         val userName = binding.userNameText.text.toString()
         val acsToken = binding.acsTokenText.text.toString()
 
@@ -149,12 +172,18 @@ class CallLauncherActivity : AppCompatActivity() {
             }
         }
 
-        callLauncherViewModel.launch(
+        callLauncherViewModel.initCallComposite(
             this@CallLauncherActivity,
             acsToken,
             userName,
             groupId,
             meetingLink,
+        )
+    }
+
+    private fun launch() {
+        callLauncherViewModel.launch(
+            this@CallLauncherActivity
         )
     }
 
