@@ -66,7 +66,7 @@ class CallLauncherActivity : AppCompatActivity() {
             // Log and toast
             Log.d("FirebaseTest ", token)
         })
-        
+
         val data: Uri? = intent?.data
         val deeplinkAcsToken = data?.getQueryParameter("acstoken")
         val deeplinkName = data?.getQueryParameter("name")
