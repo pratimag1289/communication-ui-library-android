@@ -42,27 +42,35 @@ class MyFirebaseMessagingService: FirebaseMessagingService()
 
     private fun showNotificationForIncomingCall(notification: PushNotificationInfo) {
         Log.i(TAG, "Showing notification for incoming call")
-   /*     val resultIntent = Intent(this, CallLauncherActivity::class.java)
-        val stackBuilder: TaskStackBuilder = TaskStackBuilder.create(this)
+        val resultIntent = Intent(this, CallLauncherActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val stackBuilder = TaskStackBuilder.create(this)
         stackBuilder.addNextIntentWithParentStack(resultIntent)
-        val resultPendingIntent: PendingIntent =
-            stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)*/
-      /*  val answerCallIntent = Intent(applicationContext, CallLauncherActivity::class.java)
+
+        val resultPendingIntent =
+            stackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+
+        val answerCallIntent = Intent(applicationContext, HandleNotification::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
         answerCallIntent.putExtra("action", "answer")
         val answerCallPendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             1200,
             answerCallIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )*/
-      /*  val declineCallIntent = Intent(applicationContext, CallLauncherActivity::class.java)
-        declineCallIntent.putExtra("action", "decline")*/
-    /*    val declineCallPendingIntent = PendingIntent.getBroadcast(
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val declineCallIntent = Intent(applicationContext, HandleNotification::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        declineCallIntent.putExtra("action", "decline")
+        val declineCallPendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             1201,
             declineCallIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )*/
+            PendingIntent.FLAG_IMMUTABLE
+        )
         val content = java.lang.String.format(
             "%s: \n%s\n %s",
             last10(Utilities.toMRI(notification.from)),
@@ -70,16 +78,16 @@ class MyFirebaseMessagingService: FirebaseMessagingService()
             last10(Utilities.toMRI(notification.to))
         )
         val builder: NotificationCompat.Builder = NotificationCompat.Builder(this, "acs")
-           // .setContentIntent(resultPendingIntent)
+            .setContentIntent(resultPendingIntent)
             .setSmallIcon(R.drawable.ic_menu_call)
-            //.setCategory(NotificationCompat.CATEGORY_CALL)
+            .setCategory(NotificationCompat.CATEGORY_CALL)
             .setContentTitle("sss")
             .setContentText(content)
-          //  .addAction(R.drawable.ic_menu_call, "Accept", answerCallPendingIntent)
-          //  .addAction(R.drawable.ic_menu_call, "Decline", declineCallPendingIntent)
+            .addAction(R.drawable.ic_menu_call, "Accept", answerCallPendingIntent)
+            .addAction(R.drawable.ic_menu_call, "Decline", declineCallPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-           // .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
-           // .setOngoing(true)
+            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
+            .setOngoing(true)
             .setAutoCancel(true)
         val notificationManager = NotificationManagerCompat.from(this)
         notificationManager.notify(1, builder.build())
