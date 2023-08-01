@@ -147,6 +147,16 @@ internal class CallingSDKWrapper(
         cleanupResources()
     }
 
+    public fun createCallClient() : CallClient {
+        if (callClient == null) {
+            val callClientOptions = CallClientOptions().also {
+                it.setTags(callConfig.diagnosticConfig.tags, logger)
+            }
+            callClient = CallClient(callClientOptions)
+        }
+        return callClient!!
+    }
+
     override fun setupCall(): CompletableFuture<Void> {
         if (callClient == null) {
             val callClientOptions = CallClientOptions().also {
@@ -261,6 +271,7 @@ internal class CallingSDKWrapper(
         return call.mute(context)
     }
 
+
     override fun getLocalVideoStream(): CompletableFuture<LocalVideoStream> {
         val result = CompletableFuture<LocalVideoStream>()
         setupCallCompletableFuture.whenComplete { _, error ->
@@ -303,7 +314,7 @@ internal class CallingSDKWrapper(
         return result
     }
 
-    private fun createCallAgent(): CompletableFuture<CallAgent> {
+    fun createCallAgent(): CompletableFuture<CallAgent> {
 
         if (callAgentCompletableFuture == null || callAgentCompletableFuture!!.isCompletedExceptionally) {
             callAgentCompletableFuture = CompletableFuture<CallAgent>()

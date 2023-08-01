@@ -46,6 +46,7 @@ class CallLauncherViewModel : ViewModel() {
         remoteOptions =
             CallCompositeRemoteOptions(locator, communicationTokenCredential, displayName)
 
+        callComposite?.getCallClient(context, remoteOptions)
     }
 
     fun launch(

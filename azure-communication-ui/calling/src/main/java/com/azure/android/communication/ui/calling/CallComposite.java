@@ -34,6 +34,8 @@ import static com.azure.android.communication.ui.calling.service.sdk.TypeConvers
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 
+import java9.util.concurrent.CompletableFuture;
+
 /**
  * Azure android communication calling composite component.
  *
@@ -96,46 +98,34 @@ public final class CallComposite {
 
     public CallClient getCallClient(final Context context,
                                     final CallCompositeRemoteOptions remoteOptions) {
-        if (diContainer != null) {
-            final DependencyInjectionContainer container = diContainer.get();
-            if (container != null) {
-                if (serviceWrapperDependencyContainer == null) {
-                    UUID groupId = null;
-                    String meetingLink = null;
-                    final CallType callType;
+        if (serviceWrapperDependencyContainer == null) {
+            UUID groupId = null;
+            String meetingLink = null;
+            final CallType callType;
 
-                    final CallCompositeJoinLocator locator = remoteOptions.getLocator();
-                    if (locator instanceof CallCompositeGroupCallLocator) {
-                        callType = CallType.GROUP_CALL;
-                        groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
-                    } else {
-                        callType = CallType.TEAMS_MEETING;
-                        meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
-                    }
-
-                    configuration.setCallConfig(new CallConfiguration(
-                            remoteOptions.getCredential(),
-                            remoteOptions.getDisplayName(),
-                            groupId,
-                            meetingLink,
-                            callType));
-
-                    serviceWrapperDependencyContainer = new ServiceWrapperDependencyContainer(context, this);
-                }
-                return container.getCallingSDKWrapperNative().getCallClient();
+            final CallCompositeJoinLocator locator = remoteOptions.getLocator();
+            if (locator instanceof CallCompositeGroupCallLocator) {
+                callType = CallType.GROUP_CALL;
+                groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
+            } else {
+                callType = CallType.TEAMS_MEETING;
+                meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
             }
+
+            configuration.setCallConfig(new CallConfiguration(
+                    remoteOptions.getCredential(),
+                    remoteOptions.getDisplayName(),
+                    groupId,
+                    meetingLink,
+                    callType));
+
+            serviceWrapperDependencyContainer = new ServiceWrapperDependencyContainer(context, this);
         }
-        return null;
+        return serviceWrapperDependencyContainer.getCallingSDKWrapperNative().createCallClient();
     }
 
-    public CallAgent getCallAgent() {
-        if (diContainer != null) {
-            final DependencyInjectionContainer container = diContainer.get();
-            if (container != null) {
-                return container.getCallingSDKWrapperNative().getCallAgent();
-            }
-        }
-        return null;
+    public CompletableFuture<CallAgent> getCallAgent() {
+        return serviceWrapperDependencyContainer.getCallingSDKWrapperNative().createCallAgent();
     }
 
     /**

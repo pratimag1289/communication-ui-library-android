@@ -54,19 +54,6 @@ class CallLauncherActivity : AppCompatActivity() {
         binding = ActivityCallLauncherBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FirebaseTest ", "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and toast
-            Log.d("FirebaseTest ", token)
-        })
-
         val data: Uri? = intent?.data
         val deeplinkAcsToken = data?.getQueryParameter("acstoken")
         val deeplinkName = data?.getQueryParameter("name")
@@ -179,6 +166,41 @@ class CallLauncherActivity : AppCompatActivity() {
             groupId,
             meetingLink,
         )
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FirebaseTest ", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.d("FirebaseTest ", token)
+
+            callLauncherViewModel?.callComposite?.callAgent?.whenComplete {
+                    callAgent, error: Throwable? ->
+                if (error != null) {
+                    Log.d("FirebaseTest ", "registerPushNotification fail")
+                } else {
+
+                    callAgent.addOnIncomingCallListener { call ->
+                        Log.d("FirebaseTest ", "incoming call")
+                    }
+
+
+                    callAgent.registerPushNotification(token)?.whenComplete {
+                            _, error: Throwable? ->
+                        if (error != null) {
+                            Log.d("FirebaseTest ", "registerPushNotification fail")
+                        } else {
+                            Log.d("FirebaseTest ", "registerPushNotification pass")
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun launch() {
