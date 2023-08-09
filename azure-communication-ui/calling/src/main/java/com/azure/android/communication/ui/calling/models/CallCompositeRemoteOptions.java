@@ -3,6 +3,7 @@
 
 package com.azure.android.communication.ui.calling.models;
 
+import com.azure.android.communication.calling.PushNotificationInfo;
 import com.azure.android.communication.common.CommunicationTokenCredential;
 import com.azure.android.communication.ui.calling.CallComposite;
 
@@ -33,6 +34,8 @@ public final class CallCompositeRemoteOptions {
     private final CommunicationTokenCredential credential;
     private final CallCompositeJoinLocator locator;
 
+    private final PushNotificationInfo pushNotificationInfo;
+
     // Optional
     private final String displayName;
 
@@ -44,8 +47,9 @@ public final class CallCompositeRemoteOptions {
      */
     public CallCompositeRemoteOptions(
             final CallCompositeJoinLocator locator,
-            final CommunicationTokenCredential credential) {
-        this(locator, credential, "");
+            final CommunicationTokenCredential credential,
+            final PushNotificationInfo pushNotificationInfo) {
+        this(locator, credential, "", pushNotificationInfo);
     }
 
     /**
@@ -58,11 +62,13 @@ public final class CallCompositeRemoteOptions {
     public CallCompositeRemoteOptions(
             final CallCompositeJoinLocator locator,
             final CommunicationTokenCredential credential,
-            final String displayName) {
+            final String displayName,
+            final PushNotificationInfo pushNotificationInfo) {
 
         this.credential = credential;
         this.displayName = displayName;
         this.locator = locator;
+        this.pushNotificationInfo = pushNotificationInfo;
     }
 
     /**
@@ -90,5 +96,9 @@ public final class CallCompositeRemoteOptions {
      */
     public CallCompositeJoinLocator getLocator() {
         return locator;
+    }
+
+    public PushNotificationInfo getPushNotificationInfo() {
+        return pushNotificationInfo;
     }
 }

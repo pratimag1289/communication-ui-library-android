@@ -5,6 +5,7 @@ package com.azure.android.communication.ui.callingcompositedemoapp
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.azure.android.communication.calling.PushNotificationInfo
 import com.azure.android.communication.common.CommunicationTokenCredential
 import com.azure.android.communication.common.CommunicationTokenRefreshOptions
 import com.azure.android.communication.ui.calling.CallComposite
@@ -26,6 +27,8 @@ class CallLauncherViewModel : ViewModel() {
     var callComposite: CallComposite? = null
     private var remoteOptions: CallCompositeRemoteOptions? = null
 
+    private var communicationTokenCredential :CommunicationTokenCredential? = null
+
     fun initCallComposite(        context: Context,
                                   acsToken: String,
                                   displayName: String,
@@ -36,7 +39,7 @@ class CallLauncherViewModel : ViewModel() {
 
         val communicationTokenRefreshOptions =
             CommunicationTokenRefreshOptions({ acsToken }, true)
-        val communicationTokenCredential =
+        communicationTokenCredential =
             CommunicationTokenCredential(communicationTokenRefreshOptions)
 
         val locator: CallCompositeJoinLocator =
@@ -44,9 +47,37 @@ class CallLauncherViewModel : ViewModel() {
             else CallCompositeTeamsMeetingLinkLocator(meetingLink)
 
         remoteOptions =
-            CallCompositeRemoteOptions(locator, communicationTokenCredential, displayName)
+            CallCompositeRemoteOptions(locator, communicationTokenCredential, "IPS" ,notificationData)
 
-        callComposite?.getCallClient(context, remoteOptions)
+       // callComposite?.getCallClient(context, remoteOptions)
+    }
+
+    fun incomingCallAccept(context: Context) {
+        callComposite!!.addOnErrorEventHandler(CallLauncherActivityErrorHandler(context, callComposite!!))
+
+        if (SettingsFeatures.getRemoteParticipantPersonaInjectionSelection()) {
+            callComposite?.addOnRemoteParticipantJoinedEventHandler(
+                RemoteParticipantJoinedHandler(callComposite!!, context)
+            )
+        }
+
+        val localOptions = CallCompositeLocalOptions()
+            .setParticipantViewData(SettingsFeatures.getParticipantViewData(context.applicationContext))
+            .setSetupScreenViewData(
+                CallCompositeSetupScreenViewData()
+                    .setTitle(SettingsFeatures.getTitle())
+                    .setSubtitle(SettingsFeatures.getSubtitle())
+            )
+            .setSkipSetupScreen(SettingsFeatures.getSkipSetupScreenFeatureOption())
+            .setCameraOn(SettingsFeatures.getCameraOnByDefaultOption())
+            .setMicrophoneOn(SettingsFeatures.getMicOnByDefaultOption())
+
+        val locator: CallCompositeJoinLocator = CallCompositeTeamsMeetingLinkLocator("")
+
+        remoteOptions =
+            CallCompositeRemoteOptions(locator, communicationTokenCredential, "IPS" ,notificationData)
+
+        callComposite?.launch(context, remoteOptions, localOptions)
     }
 
     fun launch(
@@ -100,5 +131,7 @@ class CallLauncherViewModel : ViewModel() {
 
     companion object {
         var callComposite: CallComposite? = null
+        var notificationData: PushNotificationInfo? = null
+
     }
 }

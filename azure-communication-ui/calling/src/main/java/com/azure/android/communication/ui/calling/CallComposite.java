@@ -117,7 +117,8 @@ public final class CallComposite {
                     remoteOptions.getDisplayName(),
                     groupId,
                     meetingLink,
-                    callType));
+                    callType,
+                    remoteOptions.getPushNotificationInfo()));
 
             serviceWrapperDependencyContainer = new ServiceWrapperDependencyContainer(context, this);
         }
@@ -281,28 +282,29 @@ public final class CallComposite {
         AndroidThreeTen.init(context.getApplicationContext());
 
         if (serviceWrapperDependencyContainer == null) {
-            UUID groupId = null;
-            String meetingLink = null;
-            final CallType callType;
-
-            final CallCompositeJoinLocator locator = remoteOptions.getLocator();
-            if (locator instanceof CallCompositeGroupCallLocator) {
-                callType = CallType.GROUP_CALL;
-                groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
-            } else {
-                callType = CallType.TEAMS_MEETING;
-                meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
-            }
-
-            configuration.setCallConfig(new CallConfiguration(
-                    remoteOptions.getCredential(),
-                    remoteOptions.getDisplayName(),
-                    groupId,
-                    meetingLink,
-                    callType));
-
             serviceWrapperDependencyContainer = new ServiceWrapperDependencyContainer(context, this);
         }
+
+        UUID groupId = null;
+        String meetingLink = null;
+        final CallType callType;
+
+        final CallCompositeJoinLocator locator = remoteOptions.getLocator();
+        if (locator instanceof CallCompositeGroupCallLocator) {
+            callType = CallType.GROUP_CALL;
+            groupId = ((CallCompositeGroupCallLocator) locator).getGroupId();
+        } else {
+            callType = CallType.TEAMS_MEETING;
+            meetingLink = ((CallCompositeTeamsMeetingLinkLocator) locator).getMeetingLink();
+        }
+
+        configuration.setCallConfig(new CallConfiguration(
+                remoteOptions.getCredential(),
+                remoteOptions.getDisplayName(),
+                groupId,
+                meetingLink,
+                callType,
+                remoteOptions.getPushNotificationInfo()));
 
         if (localOptions != null) {
             configuration.setCallCompositeLocalOptions(localOptions);

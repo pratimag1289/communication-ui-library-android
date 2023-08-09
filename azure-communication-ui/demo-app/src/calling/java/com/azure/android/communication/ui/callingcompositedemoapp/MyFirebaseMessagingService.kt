@@ -3,6 +3,7 @@ package com.azure.android.communication.ui.callingcompositedemoapp
 import android.R
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
+import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.util.Log
@@ -17,6 +18,9 @@ class MyFirebaseMessagingService: FirebaseMessagingService()
 {
     private val TAG = "FirebaseTest "
 
+    private val sharedPreference by lazy {
+        getSharedPreferences(SETTINGS_SHARED_PREFS, Context.MODE_PRIVATE)
+    }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
@@ -31,13 +35,14 @@ class MyFirebaseMessagingService: FirebaseMessagingService()
         if (messageData.isNotEmpty()) {
             try {
                 val notification = PushNotificationInfo.fromMap(messageData)
+
+                CallLauncherViewModel.notificationData = notification
                 showNotificationForIncomingCall(notification)
             } catch (e: Exception) {
 
             }
         }
         super.onMessageReceived(remoteMessage)
-
     }
 
     private fun showNotificationForIncomingCall(notification: PushNotificationInfo) {

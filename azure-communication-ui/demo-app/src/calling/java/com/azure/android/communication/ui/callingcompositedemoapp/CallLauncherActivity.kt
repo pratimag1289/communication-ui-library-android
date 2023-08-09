@@ -30,8 +30,19 @@ import org.threeten.bp.format.DateTimeFormatter
 
 
 class CallLauncherActivity : AppCompatActivity() {
+
+    companion object {
+        var callLauncherActivity: CallLauncherActivity? = null
+    }
+
     private lateinit var binding: ActivityCallLauncherBinding
-    private val callLauncherViewModel: CallLauncherViewModel by viewModels()
+    val callLauncherViewModel: CallLauncherViewModel by viewModels()
+
+
+    fun answerCall() {
+        initCallingSDK()
+        callLauncherViewModel.incomingCallAccept(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +68,10 @@ class CallLauncherActivity : AppCompatActivity() {
 
         binding = ActivityCallLauncherBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val action = intent.getStringExtra("action")
+        callLauncherActivity = this
+
 
         val data: Uri? = intent?.data
         val deeplinkAcsToken = data?.getQueryParameter("acstoken")
@@ -170,7 +185,7 @@ class CallLauncherActivity : AppCompatActivity() {
             groupId,
             meetingLink,
         )
-
+        return
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful) {
                 Log.w("FirebaseTest ", "Fetching FCM registration token failed", task.exception)
@@ -190,9 +205,13 @@ class CallLauncherActivity : AppCompatActivity() {
                 } else {
 
                     callAgent.addOnIncomingCallListener { call ->
+
+                        //call.accept()
                         Log.d("FirebaseTest ", "addOnIncomingCallListener incoming call")
                     }
 
+
+                  //  callAgent.handlePushNotification()
 
                     callAgent.registerPushNotification(token)?.whenComplete {
                             _, error: Throwable? ->

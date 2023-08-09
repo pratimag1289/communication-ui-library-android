@@ -3,8 +3,10 @@ package com.azure.android.communication.ui.callingcompositedemoapp
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+
 
 class HandleNotification: BroadcastReceiver()
 {
@@ -14,18 +16,22 @@ class HandleNotification: BroadcastReceiver()
         NotificationManagerCompat.from(context).cancelAll()
         Log.i(TAG, "HandleNotification.onReceive()")
 
-        if (intent != null && intent.extras != null) {
+        if (intent.extras != null) {
             val action = intent.getStringExtra("action")
             Log.i(TAG, String.format("action:%s", action))
             assert(action != null)
-            //waitForIncomingCall()
-            if (action == "answer") {
-                //answerCall(context)
-            } else if (action == "decline") {
-                //declineCall(context)
-            }
-            //context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-            //context.stopService(Intent(context, HandleNotification::class.java))
+
+            CallLauncherActivity.callLauncherActivity?.answerCall()
+
+            /*
+            val intent = Intent(context, CallLauncherActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.putExtra("action", action)
+            context.startActivity(intent)
+             */
+
+
+           // context.stopService(Intent(context, HandleNotification::class.java))
         }
     }
 

@@ -4,6 +4,8 @@
 package com.azure.android.communication.ui.calling.service.sdk
 
 import android.content.Context
+import android.util.Log
+import com.azure.android.communication.calling.AcceptCallOptions
 import com.azure.android.communication.calling.AudioOptions
 import com.azure.android.communication.calling.Call
 import com.azure.android.communication.calling.CallAgent
@@ -13,13 +15,17 @@ import com.azure.android.communication.calling.CallClientOptions
 import com.azure.android.communication.calling.CameraFacing
 import com.azure.android.communication.calling.DeviceManager
 import com.azure.android.communication.calling.GroupCallLocator
-import com.azure.android.communication.calling.LocalVideoStream as NativeLocalVideoStream
 import com.azure.android.communication.calling.HangUpOptions
+import com.azure.android.communication.calling.IncomingAudioOptions
+import com.azure.android.communication.calling.IncomingCall
 import com.azure.android.communication.calling.JoinCallOptions
 import com.azure.android.communication.calling.JoinMeetingLocator
+import com.azure.android.communication.calling.PushNotificationInfo
+import com.azure.android.communication.calling.StartCallOptions
 import com.azure.android.communication.calling.TeamsMeetingLinkLocator
 import com.azure.android.communication.calling.VideoDevicesUpdatedListener
 import com.azure.android.communication.calling.VideoOptions
+import com.azure.android.communication.common.CommunicationUserIdentifier
 import com.azure.android.communication.ui.calling.CallCompositeException
 import com.azure.android.communication.ui.calling.configuration.CallConfiguration
 import com.azure.android.communication.ui.calling.configuration.CallType
@@ -36,6 +42,8 @@ import java9.util.concurrent.CompletableFuture
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.azure.android.communication.calling.LocalVideoStream as NativeLocalVideoStream
+
 
 internal class CallingSDKWrapper(
     private val context: Context,
@@ -46,6 +54,7 @@ internal class CallingSDKWrapper(
     private var nullableCall: Call? = null
     var callClient: CallClient? = null
     var callAgent: CallAgent? = null;
+    private var incomingCall: IncomingCall? = null
 
     private var callAgentCompletableFuture: CompletableFuture<CallAgent>? = null
     private var deviceManagerCompletableFuture: CompletableFuture<DeviceManager>? = null
@@ -56,6 +65,11 @@ internal class CallingSDKWrapper(
 
     private var videoDevicesUpdatedListener: VideoDevicesUpdatedListener? = null
     private var camerasCountStateFlow = MutableStateFlow(0)
+
+    private fun handlePushNotification(notification: PushNotificationInfo) {
+        Log.d("FirebaseTest ", "sdk wrapper handlePushNotification")
+       callAgent?.handlePushNotification(notification)
+    }
 
     private val callConfig: CallConfiguration
         get() {
@@ -181,13 +195,18 @@ internal class CallingSDKWrapper(
     ): CompletableFuture<Void> {
 
         val startCallCompletableFuture = CompletableFuture<Void>()
+        Log.d("FirebaseTest ", " startCall")
         createCallAgent().thenAccept { agent: CallAgent ->
+            Log.d("FirebaseTest ", "handlePushNotification startCall")
+            handlePushNotification(callConfig.pushnotificationInfo!!)
+        }
+
+        startCallCompletableFuture.complete(null)
+
+        /*createCallAgent().thenAccept { agent: CallAgent ->
             val audioOptions = AudioOptions()
             audioOptions.isMuted = (audioState.operation != AudioOperationalStatus.ON)
-            val callLocator: JoinMeetingLocator = when (callConfig.callType) {
-                CallType.GROUP_CALL -> GroupCallLocator(callConfig.groupId)
-                CallType.TEAMS_MEETING -> TeamsMeetingLinkLocator(callConfig.meetingLink)
-            }
+
             var videoOptions: VideoOptions? = null
             // it is possible to have camera state not on, (Example: waiting for local video stream)
             // if camera on is in progress, the waiting will make sure for starting call with right state
@@ -198,19 +217,20 @@ internal class CallingSDKWrapper(
                             arrayOf(videoStream.native as NativeLocalVideoStream)
                         videoOptions = VideoOptions(localVideoStreams)
                     }
-                    joinCall(agent, audioOptions, videoOptions, callLocator)
+                  //  startCall(agent, audioOptions, videoOptions, callConfig.meetingLink!!)
                 }.exceptionally { error ->
                     onJoinCallFailed(startCallCompletableFuture, error)
                 }
             } else {
-                joinCall(agent, audioOptions, videoOptions, callLocator)
+             //   startCall(agent, audioOptions, videoOptions, callConfig.meetingLink!!)
             }
+            handlePushNotification(callConfig.meetingLink!!)
 
             startCallCompletableFuture.complete(null)
         }
             .exceptionally { error ->
                 onJoinCallFailed(startCallCompletableFuture, error)
-            }
+            }*/
 
         return startCallCompletableFuture
     }
@@ -330,7 +350,19 @@ internal class CallingSDKWrapper(
                         callAgentCompletableFuture!!.completeExceptionally(error)
                     } else {
                         this.callAgent = callAgent
+
+                        callAgent.addOnIncomingCallListener {incomingCall ->
+                            this.incomingCall = incomingCall
+                            val audioOptions = AudioOptions()
+                            audioOptions.isMuted = true
+                            Log.d("FirebaseTest ", "addOnIncomingCallListener startCall")
+                            startCall(callAgent, audioOptions, null, callConfig.meetingLink!!)
+                        }
+
                         callAgentCompletableFuture!!.complete(callAgent)
+
+
+
                     }
                 }
             } catch (error: Throwable) {
@@ -339,6 +371,28 @@ internal class CallingSDKWrapper(
         }
 
         return callAgentCompletableFuture!!
+    }
+
+    private fun startCall(
+        agent: CallAgent,
+        audioOptions: AudioOptions,
+        videoOptions: VideoOptions?,
+        id: String,
+    ) {
+
+        //val participants: ArrayList<com.azure.android.communication.common.CommunicationIdentifier> = ArrayList<com.azure.android.communication.common.CommunicationIdentifier>()
+
+      //  val userIdentifier: com.azure.android.communication.common.CommunicationIdentifier = CommunicationUserIdentifier(id)
+       // participants.add(userIdentifier)
+
+        val joinCallOptions = StartCallOptions()
+        joinCallOptions.audioOptions = audioOptions
+        videoOptions?.let { joinCallOptions.videoOptions = videoOptions }
+
+        val acceptCallOptions = AcceptCallOptions()
+        videoOptions?.let { acceptCallOptions.videoOptions = videoOptions }
+        nullableCall = incomingCall?.accept(context, acceptCallOptions)?.get()//agent.startCall(context, participants, joinCallOptions)
+        callingSDKEventHandler.onJoinCall(call)
     }
 
     private fun joinCall(
