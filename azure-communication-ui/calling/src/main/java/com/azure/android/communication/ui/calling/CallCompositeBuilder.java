@@ -3,6 +3,7 @@
 
 package com.azure.android.communication.ui.calling;
 
+import com.azure.android.communication.ui.calling.models.CallCompositeCallScreenOptions;
 import com.azure.android.communication.ui.calling.models.CallCompositeLocalizationOptions;
 import com.azure.android.communication.ui.calling.configuration.CallCompositeConfiguration;
 import com.azure.android.communication.ui.calling.models.CallCompositeSupportedScreenOrientation;
@@ -19,6 +20,7 @@ public final class CallCompositeBuilder {
     private CallCompositeLocalizationOptions localizationConfig = null;
     private CallCompositeSupportedScreenOrientation callScreenOrientation = null;
     private CallCompositeSupportedScreenOrientation setupScreenOrientation = null;
+    private CallCompositeCallScreenOptions callScreenOptions = null;
 
     /**
      * Sets an optional theme for call-composite to use by {@link CallComposite}.
@@ -66,6 +68,17 @@ public final class CallCompositeBuilder {
         return this;
     }
 
+    /***
+     * Sets an optional call screen options for call-composite
+     *
+     * @param callScreenOptions {@link CallCompositeCallScreenOptions}
+     * @return {@link CallCompositeBuilder} for chaining options.
+     */
+    public CallCompositeBuilder callScreenOptions(final CallCompositeCallScreenOptions callScreenOptions) {
+        this.callScreenOptions = callScreenOptions;
+        return this;
+    }
+
     /**
      * Builds the CallCompositeClass {@link CallComposite}.
      *
@@ -77,6 +90,7 @@ public final class CallCompositeBuilder {
         config.setLocalizationConfig(localizationConfig);
         config.setCallScreenOrientation(this.callScreenOrientation);
         config.setSetupScreenOrientation(this.setupScreenOrientation);
+        config.setCallScreenOptions(this.callScreenOptions);
         return new CallComposite(config);
     }
 }
