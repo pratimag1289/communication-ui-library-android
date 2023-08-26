@@ -3,6 +3,9 @@
 
 package com.azure.android.communication.ui.calling.presentation.fragment.calling
 
+import com.azure.android.communication.ui.calling.models.CallCompositeCallScreenOptions
+import com.azure.android.communication.ui.calling.models.ParticipantInfoModel
+import com.azure.android.communication.ui.calling.models.ParticipantStatus
 import com.azure.android.communication.ui.calling.presentation.fragment.BaseViewModel
 import com.azure.android.communication.ui.calling.presentation.fragment.factories.CallingViewModelFactory
 import com.azure.android.communication.ui.calling.presentation.manager.NetworkManager
@@ -18,7 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 internal class CallingViewModel(
     store: Store<ReduxState>,
     callingViewModelProvider: CallingViewModelFactory,
-    private val networkManager: NetworkManager
+    private val networkManager: NetworkManager,
+    callScreenOptions: CallCompositeCallScreenOptions?
 ) :
     BaseViewModel(store) {
 
@@ -35,6 +39,8 @@ internal class CallingViewModel(
     val connectingLobbyOverlayViewModel = callingViewModelProvider.connectingLobbyOverlayViewModel
     val holdOverlayViewModel = callingViewModelProvider.onHoldOverlayViewModel
     val errorInfoViewModel = callingViewModelProvider.errorInfoViewModel
+    private val gridViewLobbyParticipantVisible = callScreenOptions?.gridViewOptions?.isLobbyParticipantsVisible ?: true
+    private val participantListLobbyParticipantVisible = callScreenOptions?.participantListOptions?.isLobbyParticipantsVisible ?: true
 
     private var hasSetupCalled = false
 
@@ -59,11 +65,14 @@ internal class CallingViewModel(
             moreCallOptionsListViewModel::display,
         )
 
+        val remoteParticipantsExcludingLobbyStatus = remoteParticipantsExcludingLobbyStatus(state.remoteParticipantState.participantMap)
+        val remoteParticipantsCount = remoteParticipantsCount(remoteParticipantsExcludingLobbyStatus, state.remoteParticipantState.participantMap)
+
         localParticipantViewModel.init(
             state.localParticipantState.displayName,
             state.localParticipantState.audioState.operation,
             state.localParticipantState.videoStreamID,
-            state.remoteParticipantState.participantMap.count(),
+            remoteParticipantsCount,
             state.callState.callingStatus,
             state.localParticipantState.cameraState.device,
             state.localParticipantState.cameraState.camerasCount,
@@ -71,7 +80,7 @@ internal class CallingViewModel(
 
         floatingHeaderViewModel.init(
             state.callState.callingStatus,
-            state.remoteParticipantState.participantMap.count()
+            remoteParticipantsCount
         )
         audioDeviceListViewModel.init(
             state.localParticipantState.audioState
@@ -81,7 +90,8 @@ internal class CallingViewModel(
         )
 
         participantListViewModel.init(
-            state.remoteParticipantState.participantMap,
+            if (!participantListLobbyParticipantVisible) remoteParticipantsExcludingLobbyStatus else
+                state.remoteParticipantState.participantMap,
             state.localParticipantState
         )
 
@@ -123,11 +133,14 @@ internal class CallingViewModel(
             state.callState.callingStatus
         )
 
+        val remoteParticipantsExcludingLobbyStatus = remoteParticipantsExcludingLobbyStatus(state.remoteParticipantState.participantMap)
+        val remoteParticipantsCount = remoteParticipantsCount(remoteParticipantsExcludingLobbyStatus, state.remoteParticipantState.participantMap)
+
         localParticipantViewModel.update(
             state.localParticipantState.displayName,
             state.localParticipantState.audioState.operation,
             state.localParticipantState.videoStreamID,
-            state.remoteParticipantState.participantMap.count(),
+            remoteParticipantsCount,
             state.callState.callingStatus,
             state.localParticipantState.cameraState.device,
             state.localParticipantState.cameraState.camerasCount,
@@ -171,17 +184,19 @@ internal class CallingViewModel(
         if (shouldUpdateRemoteParticipantsViewModels(state)) {
             participantGridViewModel.update(
                 state.remoteParticipantState.participantMapModifiedTimestamp,
-                state.remoteParticipantState.participantMap,
+                if (!gridViewLobbyParticipantVisible) remoteParticipantsExcludingLobbyStatus else
+                    state.remoteParticipantState.participantMap,
                 state.remoteParticipantState.dominantSpeakersInfo,
                 state.remoteParticipantState.dominantSpeakersModifiedTimestamp,
             )
 
             floatingHeaderViewModel.update(
-                state.remoteParticipantState.participantMap.count()
+                remoteParticipantsCount
             )
 
             participantListViewModel.update(
-                state.remoteParticipantState.participantMap,
+                if (!participantListLobbyParticipantVisible) remoteParticipantsExcludingLobbyStatus else
+                    state.remoteParticipantState.participantMap,
                 state.localParticipantState
             )
 
@@ -193,6 +208,12 @@ internal class CallingViewModel(
         }
         updateOverlayDisplayedState(state.callState.callingStatus)
     }
+
+    private fun remoteParticipantsExcludingLobbyStatus(participants: Map<String, ParticipantInfoModel>): Map<String, ParticipantInfoModel> =
+        participants.filter { it.value.participantStatus != ParticipantStatus.IN_LOBBY }
+
+    private fun remoteParticipantsCount(remoteParticipantsExcludingLobbyStatus: Map<String, ParticipantInfoModel>, allParticipants: Map<String, ParticipantInfoModel>): Int =
+        if (!gridViewLobbyParticipantVisible || !participantListLobbyParticipantVisible) remoteParticipantsExcludingLobbyStatus.count() else allParticipants.count()
 
     private fun shouldUpdateRemoteParticipantsViewModels(state: ReduxState) =
         state.callState.callingStatus == CallingStatus.CONNECTED
