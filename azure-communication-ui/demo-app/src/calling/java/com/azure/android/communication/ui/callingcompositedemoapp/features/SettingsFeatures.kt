@@ -17,12 +17,16 @@ import com.azure.android.communication.ui.callingcompositedemoapp.CALL_TITLE
 import com.azure.android.communication.ui.callingcompositedemoapp.CAMERA_ON_BY_DEFAULT_KEY
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_CALL_SCREEN_ORIENTATION_VALUE
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_CAMERA_ON_BY_DEFAULT_VALUE
+import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_VALUE
+import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_VALUE
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_LANGUAGE_VALUE
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_MIC_ON_BY_DEFAULT_VALUE
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_PERSONA_INJECTION_VALUE_PREF_KEY
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_RTL_VALUE
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_SETUP_SCREEN_ORIENTATION_VALUE
 import com.azure.android.communication.ui.callingcompositedemoapp.DEFAULT_SKIP_SETUP_SCREEN_VALUE
+import com.azure.android.communication.ui.callingcompositedemoapp.HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_SHARED_PREF_KEY
+import com.azure.android.communication.ui.callingcompositedemoapp.HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_SHARED_PREF_KEY
 import com.azure.android.communication.ui.callingcompositedemoapp.LANGUAGE_ADAPTER_VALUE_SHARED_PREF_KEY
 import com.azure.android.communication.ui.callingcompositedemoapp.LANGUAGE_ISRTL_VALUE_SHARED_PREF_KEY
 import com.azure.android.communication.ui.callingcompositedemoapp.MIC_ON_BY_DEFAULT_KEY
@@ -91,6 +95,22 @@ class SettingsFeatures {
         @JvmStatic
         fun getRemoteParticipantPersonaInjectionSelection(): Boolean {
             return sharedPrefs.getBoolean(DEFAULT_PERSONA_INJECTION_VALUE_PREF_KEY, false)
+        }
+
+        @JvmStatic
+        fun getHideGridViewLobbyParticipants(): Boolean {
+            return sharedPrefs.getBoolean(
+                HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_SHARED_PREF_KEY,
+                DEFAULT_HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_VALUE
+            )
+        }
+
+        @JvmStatic
+        fun getHideParticipantListLobbyParticipants(): Boolean {
+            return sharedPrefs.getBoolean(
+                HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_SHARED_PREF_KEY,
+                DEFAULT_HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_VALUE
+            )
         }
 
         @JvmStatic

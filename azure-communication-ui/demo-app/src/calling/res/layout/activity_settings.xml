@@ -342,5 +342,30 @@
             tools:ignore="UsingOnClickInXml"
             />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/azure_communication_ui_calling_color_on_surface"
+            android:paddingTop="@dimen/azure_communication_ui_calling_inner_space_padding"
+            />
+
+        <CheckBox
+            android:id="@+id/hide_grid_view_lobby_participants_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onCheckBoxTap"
+            android:text="@string/hide_grid_view_lobby_participants"
+            tools:ignore="UsingOnClickInXml"
+            />
+
+        <CheckBox
+            android:id="@+id/hide_participant_list_lobby_participants_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onCheckBoxTap"
+            android:text="@string/hide_participant_list_lobby_participants"
+            tools:ignore="UsingOnClickInXml"
+            />
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 </ScrollView>

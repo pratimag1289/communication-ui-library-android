@@ -38,6 +38,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var skipSetupScreenCheckBox: CheckBox
     private lateinit var micOnByDefaultCheckBox: CheckBox
     private lateinit var cameraOnByDefaultCheckBox: CheckBox
+    private lateinit var hideGridViewLobbyParticipants: CheckBox
+    private lateinit var hideParticipantListLobbyParticipants: CheckBox
     private lateinit var supportedScreenOrientations: List<String>
     private lateinit var callScreenOrientationAdapterLayout: TextInputLayout
     private lateinit var setupScreenOrientationAdapterLayout: TextInputLayout
@@ -120,6 +122,16 @@ class SettingsActivity : AppCompatActivity() {
             val selectedItem: String = supportedScreenOrientations[position]
             saveSetupScreenOrientationInSharedPref(selectedItem)
         }
+
+        hideGridViewLobbyParticipants.isChecked = sharedPreference.getBoolean(
+            HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_SHARED_PREF_KEY,
+            DEFAULT_HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_VALUE
+        )
+
+        hideParticipantListLobbyParticipants.isChecked = sharedPreference.getBoolean(
+            HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_SHARED_PREF_KEY,
+            DEFAULT_HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_VALUE
+        )
     }
 
     fun onCheckBoxTap(view: View) {
@@ -159,6 +171,18 @@ class SettingsActivity : AppCompatActivity() {
                         view.isChecked
                     ).apply()
                 }
+                R.id.hide_grid_view_lobby_participants_check_box -> {
+                    sharedPreference.edit().putBoolean(
+                        HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_SHARED_PREF_KEY,
+                        view.isChecked
+                    ).apply()
+                }
+                R.id.hide_participant_list_lobby_participants_check_box -> {
+                    sharedPreference.edit().putBoolean(
+                        HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_SHARED_PREF_KEY,
+                        view.isChecked
+                    ).apply()
+                }
             }
         }
     }
@@ -191,6 +215,9 @@ class SettingsActivity : AppCompatActivity() {
         subtitleTextView.addTextChangedListener {
             saveSubtitle()
         }
+
+        hideGridViewLobbyParticipants = findViewById(R.id.hide_grid_view_lobby_participants_check_box)
+        hideParticipantListLobbyParticipants = findViewById(R.id.hide_participant_list_lobby_participants_check_box)
     }
 
     private fun updateRTLCheckbox() {
@@ -349,9 +376,17 @@ const val SETUP_SCREEN_ORIENTATION_SHARED_PREF_KEY = "SETUP_SCREEN_ORIENTATION_S
 const val DEFAULT_CALL_SCREEN_ORIENTATION_VALUE = "ACS_DEFAULT"
 const val DEFAULT_SETUP_SCREEN_ORIENTATION_VALUE = "PORTRAIT"
 
+// Shared pref keys for hide lobby participants
+const val HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_SHARED_PREF_KEY = "HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_SHARED_PREF_KEY"
+const val HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_SHARED_PREF_KEY = "HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_SHARED_PREF_KEY"
+
 // Shared pref default values for language & rtl settings
 const val DEFAULT_LANGUAGE_VALUE = "ENGLISH"
 const val DEFAULT_RTL_VALUE = false
+
+// Shared pref default keys for hide lobby participants
+const val DEFAULT_HIDE_GRID_VIEW_LOBBY_PARTICIPANTS_VALUE = false
+const val DEFAULT_HIDE_PARTICIPANT_LIST_LOBBY_PARTICIPANTS_VALUE = false
 
 // Shared pref default values for persona data
 const val RENDERED_DISPLAY_NAME = "RENDERED_DISPLAY_NAME"

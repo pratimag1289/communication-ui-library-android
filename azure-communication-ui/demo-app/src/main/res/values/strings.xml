@@ -48,4 +48,6 @@
     <string name="camera_control">Camera On By Default</string>
     <string name="call_screen_orientation_dropdown_hint">Call Screen Orientation</string>
     <string name="setup_screen_orientation_dropdown_hint">Setup Screen Orientation</string>
+    <string name="hide_grid_view_lobby_participants">Hide Grid View Lobby Participants</string>
+    <string name="hide_participant_list_lobby_participants">Hide Participant List Lobby Participants</string>
 </resources>

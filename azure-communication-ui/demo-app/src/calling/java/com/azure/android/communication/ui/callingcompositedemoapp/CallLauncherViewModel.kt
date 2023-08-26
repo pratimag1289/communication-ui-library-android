@@ -10,10 +10,13 @@ import com.azure.android.communication.common.CommunicationTokenRefreshOptions
 import com.azure.android.communication.ui.calling.CallComposite
 import com.azure.android.communication.ui.calling.CallCompositeBuilder
 import com.azure.android.communication.ui.calling.models.CallCompositeCallHistoryRecord
+import com.azure.android.communication.ui.calling.models.CallCompositeCallScreenOptions
+import com.azure.android.communication.ui.calling.models.CallCompositeGridViewOptions
 import com.azure.android.communication.ui.calling.models.CallCompositeGroupCallLocator
 import com.azure.android.communication.ui.calling.models.CallCompositeJoinLocator
 import com.azure.android.communication.ui.calling.models.CallCompositeLocalOptions
 import com.azure.android.communication.ui.calling.models.CallCompositeLocalizationOptions
+import com.azure.android.communication.ui.calling.models.CallCompositeParticipantListOptions
 import com.azure.android.communication.ui.calling.models.CallCompositeRemoteOptions
 import com.azure.android.communication.ui.calling.models.CallCompositeSetupScreenViewData
 import com.azure.android.communication.ui.calling.models.CallCompositeTeamsMeetingLinkLocator
@@ -86,6 +89,21 @@ class CallLauncherViewModel : ViewModel() {
 
         if (AdditionalFeatures.secondaryThemeFeature.active)
             callCompositeBuilder.theme(R.style.MyCompany_Theme_Calling)
+
+        if (SettingsFeatures.getHideGridViewLobbyParticipants() || SettingsFeatures.getHideParticipantListLobbyParticipants()) {
+            val callCompositeCallScreenOptions = CallCompositeCallScreenOptions()
+            if (SettingsFeatures.getHideGridViewLobbyParticipants()) {
+                val gridViewOptions = CallCompositeGridViewOptions()
+                gridViewOptions.isLobbyParticipantsVisible = SettingsFeatures.getHideGridViewLobbyParticipants()
+                callCompositeCallScreenOptions.gridViewOptions = gridViewOptions
+            }
+            if (SettingsFeatures.getHideParticipantListLobbyParticipants()) {
+                val participantListOptions = CallCompositeParticipantListOptions()
+                participantListOptions.isLobbyParticipantsVisible = SettingsFeatures.getHideParticipantListLobbyParticipants()
+                callCompositeCallScreenOptions.participantListOptions = participantListOptions
+            }
+            callCompositeBuilder.callScreenOptions(callCompositeCallScreenOptions)
+        }
 
         val callComposite = callCompositeBuilder.build()
 
