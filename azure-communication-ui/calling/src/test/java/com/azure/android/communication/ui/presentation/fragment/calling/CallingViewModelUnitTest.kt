@@ -480,8 +480,7 @@ internal class CallingViewModelUnitTest : ACSBaseTestCoroutine() {
             val expectedParticipantCountOnFloatingHeader = 2
             val callScreenOptions = CallCompositeCallScreenOptions().setParticipantListOptions(
                 CallCompositeParticipantListOptions().setLobbyParticipantsVisible(false)
-            )
-                .setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(false))
+            ).setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(false))
 
             callViewOptionsTests(
                 callScreenOptions,
@@ -503,8 +502,7 @@ internal class CallingViewModelUnitTest : ACSBaseTestCoroutine() {
             val expectedParticipantCountOnFloatingHeader = 3
             val callScreenOptions = CallCompositeCallScreenOptions().setParticipantListOptions(
                 CallCompositeParticipantListOptions().setLobbyParticipantsVisible(true)
-            )
-                .setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(true))
+            ).setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(true))
 
             callViewOptionsTests(
                 callScreenOptions,
@@ -526,8 +524,7 @@ internal class CallingViewModelUnitTest : ACSBaseTestCoroutine() {
             val expectedParticipantCountOnFloatingHeader = 2
             val callScreenOptions = CallCompositeCallScreenOptions().setParticipantListOptions(
                 CallCompositeParticipantListOptions().setLobbyParticipantsVisible(false)
-            )
-                .setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(true))
+            ).setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(true))
 
             callViewOptionsTests(
                 callScreenOptions,
@@ -549,8 +546,7 @@ internal class CallingViewModelUnitTest : ACSBaseTestCoroutine() {
             val expectedParticipantCountOnFloatingHeader = 2
             val callScreenOptions = CallCompositeCallScreenOptions().setParticipantListOptions(
                 CallCompositeParticipantListOptions().setLobbyParticipantsVisible(true)
-            )
-                .setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(false))
+            ).setGridViewOptions(CallCompositeGridViewOptions().setLobbyParticipantsVisible(false))
 
             callViewOptionsTests(
                 callScreenOptions,
