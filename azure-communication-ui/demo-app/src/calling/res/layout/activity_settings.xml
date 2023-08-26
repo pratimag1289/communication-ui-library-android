@@ -342,6 +342,15 @@
             tools:ignore="UsingOnClickInXml"
             />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/azure_communication_ui_calling_fab_margin"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:text="@string/lobby_participants_options"
+            />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"

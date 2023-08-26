@@ -50,4 +50,5 @@
     <string name="setup_screen_orientation_dropdown_hint">Setup Screen Orientation</string>
     <string name="hide_grid_view_lobby_participants">Hide Grid View Lobby Participants</string>
     <string name="hide_participant_list_lobby_participants">Hide Participant List Lobby Participants</string>
+    <string name="lobby_participants_options">Lobby Participants Options</string>
 </resources>
