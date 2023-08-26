@@ -94,12 +94,12 @@ class CallLauncherViewModel : ViewModel() {
             val callCompositeCallScreenOptions = CallCompositeCallScreenOptions()
             if (SettingsFeatures.getHideGridViewLobbyParticipants()) {
                 val gridViewOptions = CallCompositeGridViewOptions()
-                gridViewOptions.isLobbyParticipantsVisible = SettingsFeatures.getHideGridViewLobbyParticipants()
+                gridViewOptions.isLobbyParticipantsVisible = !SettingsFeatures.getHideGridViewLobbyParticipants()
                 callCompositeCallScreenOptions.gridViewOptions = gridViewOptions
             }
             if (SettingsFeatures.getHideParticipantListLobbyParticipants()) {
                 val participantListOptions = CallCompositeParticipantListOptions()
-                participantListOptions.isLobbyParticipantsVisible = SettingsFeatures.getHideParticipantListLobbyParticipants()
+                participantListOptions.isLobbyParticipantsVisible = !SettingsFeatures.getHideParticipantListLobbyParticipants()
                 callCompositeCallScreenOptions.participantListOptions = participantListOptions
             }
             callCompositeBuilder.callScreenOptions(callCompositeCallScreenOptions)
