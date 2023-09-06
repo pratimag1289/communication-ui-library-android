@@ -13,9 +13,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.azure.android.communication.ui.R
 import com.azure.android.communication.ui.calling.models.CallCompositeParticipantViewData
+import com.azure.android.communication.ui.calling.models.ParticipantStatus
 import com.azure.android.communication.ui.calling.presentation.manager.AvatarViewManager
 import com.azure.android.communication.ui.calling.utilities.BottomCellAdapter
 import com.azure.android.communication.ui.calling.utilities.BottomCellItem
+import com.azure.android.communication.ui.calling.utilities.BottomCellItemType
 import com.microsoft.fluentui.drawer.DrawerDialog
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -138,8 +140,18 @@ internal class ParticipantListView(
     }
 
     private fun updateRemoteParticipantListContent(listSize: Int) {
+
+        // title for in call participants
+        var titles = 1
+
+        // title for in lobby participants
+        if (viewModel?.getRemoteParticipantListCellStateFlow()?.value?.any { it.status == ParticipantStatus.IN_LOBBY } == true) {
+            titles += 1
+        }
+
+        // set the height of the list to be half of the screen height or 50dp per item, whichever is smaller
         participantTable.layoutParams.height =
-            ((listSize * 50 * context.resources.displayMetrics.density).toInt()).coerceAtMost(
+            (((listSize - titles) * 50 * context.resources.displayMetrics.density + titles * 25 * context.resources.displayMetrics.density).toInt()).coerceAtMost(
                 context.resources.displayMetrics.heightPixels / 2
             )
     }
@@ -147,7 +159,8 @@ internal class ParticipantListView(
     private fun generateBottomCellItems(
         remoteParticipantCellModels: List<ParticipantListCellModel>,
     ): MutableList<BottomCellItem> {
-        val bottomCellItems = mutableListOf<BottomCellItem>()
+        val bottomCellItemsInCallParticipants = mutableListOf<BottomCellItem>()
+        val bottomCellItemsInLobbyParticipants = mutableListOf<BottomCellItem>()
         // since we can not get resources from model class, we create the local participant list cell
         // with suffix in this way
         val localParticipant = viewModel.createLocalParticipantListCell(
@@ -155,7 +168,7 @@ internal class ParticipantListView(
         )
         val localParticipantViewData =
             avatarViewManager.callCompositeLocalOptions?.participantViewData
-        bottomCellItems
+        bottomCellItemsInCallParticipants
             .add(
                 generateBottomCellItem(
                     getLocalParticipantNameToDisplay(
@@ -173,15 +186,66 @@ internal class ParticipantListView(
             val finalName =
                 getNameToDisplay(remoteParticipantViewData, remoteParticipant.displayName)
 
-            bottomCellItems.add(
-                generateBottomCellItem(
-                    finalName.ifEmpty { context.getString(R.string.azure_communication_ui_calling_view_participant_drawer_unnamed) },
-                    remoteParticipant.isMuted, remoteParticipantViewData, remoteParticipant.isOnHold
+            if (remoteParticipant.status != ParticipantStatus.IN_LOBBY) {
+                bottomCellItemsInCallParticipants.add(
+                    generateBottomCellItem(
+                        finalName.ifEmpty { context.getString(R.string.azure_communication_ui_calling_view_participant_drawer_unnamed) },
+                        remoteParticipant.isMuted,
+                        remoteParticipantViewData,
+                        remoteParticipant.isOnHold
+                    )
+                )
+            } else {
+                bottomCellItemsInLobbyParticipants.add(
+                    generateBottomCellItem(
+                        finalName.ifEmpty { context.getString(R.string.azure_communication_ui_calling_view_participant_drawer_unnamed) },
+                        remoteParticipant.isMuted,
+                        remoteParticipantViewData,
+                        remoteParticipant.isOnHold
+                    )
+                )
+            }
+        }
+        bottomCellItemsInCallParticipants.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title!! })
+        if (bottomCellItemsInCallParticipants.isNotEmpty()) {
+            bottomCellItemsInCallParticipants.add(
+                0,
+                BottomCellItem(
+                    null,
+                    "In the call (${bottomCellItemsInCallParticipants.size - 1})",
+                    "",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    BottomCellItemType.BottomMenuTitle,
+                    null
                 )
             )
         }
-        bottomCellItems.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title!! })
-        return bottomCellItems
+
+        bottomCellItemsInLobbyParticipants.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title!! })
+        if (bottomCellItemsInLobbyParticipants.isNotEmpty()) {
+            bottomCellItemsInLobbyParticipants.add(
+                0,
+                BottomCellItem(
+                    null,
+                    "Waiting in lobby (${bottomCellItemsInLobbyParticipants.size})",
+                    "",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    BottomCellItemType.BottomMenuTitle,
+                    null
+                )
+            )
+        }
+        return (bottomCellItemsInLobbyParticipants + bottomCellItemsInCallParticipants).toMutableList()
     }
 
     private fun getLocalParticipantNameToDisplay(

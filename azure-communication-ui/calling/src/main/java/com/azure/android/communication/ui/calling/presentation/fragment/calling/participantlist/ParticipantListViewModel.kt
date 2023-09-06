@@ -74,7 +74,12 @@ internal class ParticipantListViewModel {
     }
 
     private fun getRemoteParticipantListCellModel(it: ParticipantInfoModel): ParticipantListCellModel {
-        return ParticipantListCellModel(it.displayName.trim(), it.isMuted, it.userIdentifier, it.participantStatus == ParticipantStatus.HOLD)
+        return ParticipantListCellModel(
+            it.displayName.trim(), it.isMuted,
+            it.userIdentifier,
+            it.participantStatus == ParticipantStatus.HOLD,
+            it.participantStatus
+        )
     }
 }
 
@@ -83,4 +88,5 @@ internal data class ParticipantListCellModel(
     val isMuted: Boolean,
     val userIdentifier: String,
     val isOnHold: Boolean,
+    val status: ParticipantStatus? = null
 )

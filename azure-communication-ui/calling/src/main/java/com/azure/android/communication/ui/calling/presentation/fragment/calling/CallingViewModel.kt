@@ -88,7 +88,7 @@ internal class CallingViewModel(
         )
 
         participantListViewModel.init(
-            remoteParticipantsExcludingLobbyStatus,
+            state.remoteParticipantState.participantMap,
             state.localParticipantState
         )
 
@@ -195,7 +195,7 @@ internal class CallingViewModel(
             )
 
             participantListViewModel.update(
-                remoteParticipantsExcludingLobbyStatus,
+                state.remoteParticipantState.participantMap,
                 state.localParticipantState
             )
 
