@@ -34,6 +34,7 @@ import com.azure.android.communication.ui.calling.presentation.fragment.calling.
 import com.azure.android.communication.ui.calling.presentation.fragment.common.audiodevicelist.AudioDeviceListView
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.controlbar.more.MoreCallOptionsListView
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.lobby.ConnectingLobbyOverlayView
+import com.azure.android.communication.ui.calling.presentation.fragment.calling.timer.CallDurationView
 import com.azure.android.communication.ui.calling.presentation.fragment.setup.components.ErrorInfoView
 import com.microsoft.fluentui.util.activity
 
@@ -57,6 +58,7 @@ internal class CallingFragment :
     private lateinit var confirmLeaveOverlayView: LeaveConfirmView
     private lateinit var localParticipantView: LocalParticipantView
     private lateinit var infoHeaderView: InfoHeaderView
+    private lateinit var callDurationView: CallDurationView
     private lateinit var participantGridView: ParticipantGridView
     private lateinit var audioDeviceListView: AudioDeviceListView
     private lateinit var participantListView: ParticipantListView
@@ -116,22 +118,12 @@ internal class CallingFragment :
         accessibilityManager =
             context?.applicationContext?.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
         infoHeaderView = view.findViewById(R.id.azure_communication_ui_call_floating_header)
-        if (holder.container.configuration.callCompositeLocalOptions?.durationTimerData?.visible == true) {
-            infoHeaderView.start(
-                viewLifecycleOwner,
-                viewModel.floatingHeaderViewModel,
-                this::displayParticipantList,
-                accessibilityManager.isEnabled,
-                viewModel.callDurationViewModel
-            )
-        } else {
-            infoHeaderView.start(
-                viewLifecycleOwner,
-                viewModel.floatingHeaderViewModel,
-                this::displayParticipantList,
-                accessibilityManager.isEnabled
-            )
-        }
+        infoHeaderView.start(
+            viewLifecycleOwner,
+            viewModel.floatingHeaderViewModel,
+            this::displayParticipantList,
+            accessibilityManager.isEnabled
+        )
 
         audioDeviceListView =
             AudioDeviceListView(viewModel.audioDeviceListViewModel, this.requireContext())
@@ -167,6 +159,19 @@ internal class CallingFragment :
         moreCallOptionsListView.layoutDirection =
             activity?.window?.decorView?.layoutDirection ?: LayoutDirection.LOCALE
         moreCallOptionsListView.start(viewLifecycleOwner)
+
+        callDurationView = view.findViewById(R.id.azure_communication_ui_call_duration_view)
+
+        if (holder.container.configuration.callCompositeLocalOptions?.durationTimerData?.visible == true) {
+            callDurationView.start(
+                viewLifecycleOwner,
+                viewModel.callDurationViewModel,
+                accessibilityManager.isEnabled
+            )
+        }
+        else {
+            callDurationView.visibility = View.GONE
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -218,6 +223,7 @@ internal class CallingFragment :
     }
 
     override fun onDestroy() {
+        callDurationView.stop()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requireActivity().onBackInvokedDispatcher.unregisterOnBackInvokedCallback(::onBackPressed)
         }

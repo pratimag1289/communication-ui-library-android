@@ -44,4 +44,8 @@ class CallDurationView : LinearLayout {
             }
         }
     }
+
+    fun stop() {
+        callDurationViewModel.stop()
+    }
 }

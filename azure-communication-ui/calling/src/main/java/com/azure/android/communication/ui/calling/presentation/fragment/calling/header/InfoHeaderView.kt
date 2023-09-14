@@ -14,8 +14,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.azure.android.communication.ui.R
 import com.azure.android.communication.ui.calling.presentation.MultitaskingCallCompositeActivity
-import com.azure.android.communication.ui.calling.presentation.fragment.calling.timer.CallDurationView
-import com.azure.android.communication.ui.calling.presentation.fragment.calling.timer.CallDurationViewModel
 import com.azure.android.communication.ui.calling.utilities.isAndroidTV
 import com.microsoft.fluentui.util.activity
 import kotlinx.coroutines.flow.collect
@@ -32,13 +30,11 @@ internal class InfoHeaderView : ConstraintLayout {
     private lateinit var backButton: ImageButton
     private lateinit var infoHeaderViewModel: InfoHeaderViewModel
     private lateinit var displayParticipantListCallback: () -> Unit
-    private lateinit var callDurationView: CallDurationView
 
     override fun onFinishInflate() {
         super.onFinishInflate()
         floatingHeader = this
         headerView = findViewById(R.id.azure_communication_ui_call_floating_header)
-        callDurationView = findViewById(R.id.azure_communication_ui_call_duration_view)
         participantNumberText =
             findViewById(R.id.azure_communication_ui_call_participant_number_text)
         displayParticipantsImageButton =
@@ -61,8 +57,7 @@ internal class InfoHeaderView : ConstraintLayout {
         viewLifecycleOwner: LifecycleOwner,
         infoHeaderViewModel: InfoHeaderViewModel,
         displayParticipantList: () -> Unit,
-        accessibilityEnabled: Boolean,
-        callDurationViewModel: CallDurationViewModel? = null
+        accessibilityEnabled: Boolean
     ) {
         this.infoHeaderViewModel = infoHeaderViewModel
         this.displayParticipantListCallback = displayParticipantList
@@ -104,15 +99,6 @@ internal class InfoHeaderView : ConstraintLayout {
                     ViewCompat.setImportantForAccessibility(headerView, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES)
                 }
             }
-        }
-        callDurationViewModel?.let {
-            this.callDurationView.start(
-                viewLifecycleOwner,
-                callDurationViewModel,
-                accessibilityEnabled
-            )
-        } ?: run {
-            callDurationView.visibility = View.GONE
         }
     }
 
