@@ -31,6 +31,7 @@ internal class CallingViewModel(
     val confirmLeaveOverlayViewModel = callingViewModelProvider.confirmLeaveOverlayViewModel
     val localParticipantViewModel = callingViewModelProvider.localParticipantViewModel
     val floatingHeaderViewModel = callingViewModelProvider.floatingHeaderViewModel
+    val callDurationViewModel = callingViewModelProvider.callDurationViewModel
     val audioDeviceListViewModel = callingViewModelProvider.audioDeviceListViewModel
     val participantListViewModel = callingViewModelProvider.participantListViewModel
     val bannerViewModel = callingViewModelProvider.bannerViewModel

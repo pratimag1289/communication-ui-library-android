@@ -34,6 +34,9 @@ public final class CallCompositeLocalOptions {
     private CallCompositeParticipantViewData participantViewData = null;
     private CallCompositeSetupScreenViewData setupScreenViewData = null;
     private CallCompositeParticipantRole roleHint = null;
+
+    private CallCompositeDurationTimerData durationTimerData = null;
+
     private boolean cameraOn = false;
     private boolean microphoneOn = false;
     private boolean skipSetupScreen = false;
@@ -89,6 +92,24 @@ public final class CallCompositeLocalOptions {
     public CallCompositeLocalOptions setSetupScreenViewData(
             final CallCompositeSetupScreenViewData setupScreenViewData) {
         this.setupScreenViewData = setupScreenViewData;
+        return this;
+    }
+
+    /**
+     * Get the {@link CallCompositeDurationTimerData}.
+     * @return The {@link CallCompositeDurationTimerData} that is currently set.
+     */
+    public CallCompositeDurationTimerData getDurationTimerData() {
+        return durationTimerData;
+    }
+
+    /**
+     * Set a {@link CallCompositeDurationTimerData} to be used.
+     * @param durationTimerData The duration timer object to be used.
+     * @return The current {@link CallCompositeLocalOptions} object for Fluent use.
+     */
+    public CallCompositeLocalOptions setDurationTimerData(final CallCompositeDurationTimerData durationTimerData) {
+        this.durationTimerData = durationTimerData;
         return this;
     }
 

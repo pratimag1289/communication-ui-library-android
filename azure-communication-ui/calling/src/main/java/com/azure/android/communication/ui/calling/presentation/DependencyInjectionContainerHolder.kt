@@ -87,7 +87,8 @@ internal class DependencyInjectionContainerHolder(
                 ParticipantGridCellViewModelFactory(),
                 application.resources.getInteger(R.integer.azure_communication_ui_calling_max_remote_participants),
                 container.debugInfoManager,
-                container.configuration.enableMultitasking
+                container.configuration.enableMultitasking,
+                container.configuration.callCompositeLocalOptions?.durationTimerData
             ),
             container.networkManager,
             container.configuration.enableMultitasking

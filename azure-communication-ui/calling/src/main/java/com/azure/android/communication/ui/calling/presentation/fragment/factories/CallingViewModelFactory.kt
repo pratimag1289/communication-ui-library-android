@@ -3,6 +3,7 @@
 
 package com.azure.android.communication.ui.calling.presentation.fragment.factories
 
+import com.azure.android.communication.ui.calling.models.CallCompositeDurationTimerData
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.banner.BannerViewModel
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.controlbar.ControlBarViewModel
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.hangup.LeaveConfirmViewModel
@@ -15,6 +16,7 @@ import com.azure.android.communication.ui.calling.presentation.fragment.calling.
 import com.azure.android.communication.ui.calling.presentation.fragment.common.audiodevicelist.AudioDeviceListViewModel
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.controlbar.more.MoreCallOptionsListViewModel
 import com.azure.android.communication.ui.calling.presentation.fragment.calling.lobby.ConnectingLobbyOverlayViewModel
+import com.azure.android.communication.ui.calling.presentation.fragment.calling.timer.CallDurationViewModel
 import com.azure.android.communication.ui.calling.presentation.manager.DebugInfoManager
 import com.azure.android.communication.ui.calling.redux.Store
 import com.azure.android.communication.ui.calling.redux.state.ReduxState
@@ -25,6 +27,7 @@ internal class CallingViewModelFactory(
     private val maxRemoteParticipants: Int,
     private val debugInfoManager: DebugInfoManager,
     private val enableMultitasking: Boolean,
+    private val callCompositeDurationTimerData: CallCompositeDurationTimerData?
 ) : BaseViewModelFactory(store) {
 
     val moreCallOptionsListViewModel by lazy {
@@ -41,6 +44,10 @@ internal class CallingViewModelFactory(
 
     val floatingHeaderViewModel by lazy {
         InfoHeaderViewModel(enableMultitasking)
+    }
+
+    val callDurationViewModel by lazy {
+        CallDurationViewModel(callCompositeDurationTimerData)
     }
 
     val audioDeviceListViewModel by lazy {
