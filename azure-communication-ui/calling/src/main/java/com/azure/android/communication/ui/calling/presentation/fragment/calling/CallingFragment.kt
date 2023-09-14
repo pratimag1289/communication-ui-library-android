@@ -116,12 +116,22 @@ internal class CallingFragment :
         accessibilityManager =
             context?.applicationContext?.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
         infoHeaderView = view.findViewById(R.id.azure_communication_ui_call_floating_header)
-        infoHeaderView.start(
-            viewLifecycleOwner,
-            viewModel.floatingHeaderViewModel,
-            this::displayParticipantList,
-            accessibilityManager.isEnabled
-        )
+        if (holder.container.configuration.callCompositeLocalOptions?.durationTimerData?.visible == true) {
+            infoHeaderView.start(
+                viewLifecycleOwner,
+                viewModel.floatingHeaderViewModel,
+                this::displayParticipantList,
+                accessibilityManager.isEnabled,
+                viewModel.callDurationViewModel
+            )
+        } else {
+            infoHeaderView.start(
+                viewLifecycleOwner,
+                viewModel.floatingHeaderViewModel,
+                this::displayParticipantList,
+                accessibilityManager.isEnabled
+            )
+        }
 
         audioDeviceListView =
             AudioDeviceListView(viewModel.audioDeviceListViewModel, this.requireContext())
