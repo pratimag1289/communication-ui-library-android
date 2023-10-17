@@ -3,24 +3,32 @@
 
 package com.azure.android.communication.ui.callingcompositedemoapp
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.telecom.DisconnectCause
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.azure.android.communication.common.CommunicationTokenCredential
 import com.azure.android.communication.common.CommunicationTokenRefreshOptions
 import com.azure.android.communication.ui.calling.CallComposite
 import com.azure.android.communication.ui.calling.CallCompositeBuilder
+import com.azure.android.communication.ui.calling.models.CallCompositeCallStateCode
 import com.azure.android.communication.ui.calling.models.CallCompositeIncomingCallNotificationOptions
 import com.azure.android.communication.ui.calling.models.CallCompositeParticipantRole
 import com.azure.android.communication.ui.callingcompositedemoapp.databinding.ActivityCallLauncherBinding
@@ -28,6 +36,8 @@ import com.azure.android.communication.ui.callingcompositedemoapp.features.Addit
 import com.azure.android.communication.ui.callingcompositedemoapp.features.FeatureFlags
 import com.azure.android.communication.ui.callingcompositedemoapp.features.SettingsFeatures
 import com.azure.android.communication.ui.callingcompositedemoapp.features.conditionallyRegisterDiagnostics
+import com.azure.android.communication.ui.callingcompositedemoapp.telecom_utils.CallConnectionService
+import com.azure.android.communication.ui.callingcompositedemoapp.telecom_utils.CallHandler
 import com.azure.android.communication.ui.callingcompositedemoapp.views.EndCompositeButtonView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
@@ -53,6 +63,7 @@ class CallLauncherActivity : AppCompatActivity() {
         launch()
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -123,6 +134,7 @@ class CallLauncherActivity : AppCompatActivity() {
 
             launchButton.setOnClickListener {
                 launch()
+                initCallHandler()
             }
 
             showUIButton.setOnClickListener {
@@ -197,6 +209,20 @@ class CallLauncherActivity : AppCompatActivity() {
                         if (it.isNotEmpty()) {
                             callStateText.text = it
                             EndCompositeButtonView.get(application).updateText(it)
+                            when(it) {
+                                CallCompositeCallStateCode.CONNECTING.toString() -> {
+                                    CallConnectionService.conn?.setDialing()
+                                }
+                                CallCompositeCallStateCode.CONNECTED.toString() -> {
+                                    CallConnectionService.conn?.onAnswer()
+                                }
+                                CallCompositeCallStateCode.DISCONNECTED.toString() -> {
+                                    CallConnectionService.conn?.setDisconnected(DisconnectCause(DisconnectCause.REMOTE, "REJECTED"))
+                                }
+                                CallCompositeCallStateCode.NONE.toString() -> {
+                                    CallConnectionService.conn?.setDisconnected(DisconnectCause(DisconnectCause.REMOTE, "REJECTED"))
+                                }
+                            }
                         }
                     }
                 }
@@ -244,7 +270,24 @@ class CallLauncherActivity : AppCompatActivity() {
             var options = CallCompositeIncomingCallNotificationOptions(communicationTokenCredential, token)
             callComposite.registerIncomingCallPushNotification(applicationContext, options)
         })
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CALL_PHONE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermission.launch(Manifest.permission.CALL_PHONE)
+        }
     }
+
+    private val requestPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            Toast.makeText(
+                this,
+                "Permission is ${if (isGranted) "granted" else "denied"}.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -285,6 +328,14 @@ class CallLauncherActivity : AppCompatActivity() {
             )
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun initCallHandler() {
+        val callDesc = "ACS Demo Call"
+        val userName = "Pratima"
+        val handler = CallHandler(application)
+        handler.startOutgoingCall(callDesc, userName)
     }
 
     private fun launch() {

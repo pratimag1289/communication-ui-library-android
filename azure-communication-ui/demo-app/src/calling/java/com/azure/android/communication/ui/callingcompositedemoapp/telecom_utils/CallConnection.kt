@@ -27,7 +27,7 @@ class CallConnection(private val connectionContext: Context) : Connection() {
     }
 
     override fun onAnswer() {
-        destroyConnection()
+        super.onAnswer()
         CallLauncherActivity.callLauncherActivity?.answerCall()
     }
 
@@ -42,6 +42,10 @@ class CallConnection(private val connectionContext: Context) : Connection() {
         destroyConnection()
     }
 
+    override fun onShowIncomingCallUi() {
+        super.onShowIncomingCallUi()
+        Log.e(TAG, "onShowIncomingCallUi: " )
+    }
     fun onOutgoingReject() {
         Log.e(TAG,"onDisconnect")
         destroyConnection()

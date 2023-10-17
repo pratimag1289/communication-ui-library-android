@@ -18,7 +18,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.azure.android.communication.calling.PushNotificationInfo
+import com.azure.android.communication.ui.callingcompositedemoapp.CallLauncherActivity
+
 
 @RequiresApi(Build.VERSION_CODES.M)
 class CallHandler(context: Context) {
@@ -32,6 +35,7 @@ class CallHandler(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             phoneAccountHandle = PhoneAccountHandle(componentName, "VoIP Calling")
             val phoneAccount = PhoneAccount.builder(phoneAccountHandle, "VoIP Calling")
+                .setCapabilities(PhoneAccount.CAPABILITY_CONNECTION_MANAGER)
                 .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER).build()
             telecomManager.registerPhoneAccount(phoneAccount)
         }
@@ -56,6 +60,29 @@ class CallHandler(context: Context) {
             }
         } else {
             Log.e("startIncomingCall: ","Permission not granted")
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    fun startOutgoingCall(callId: String, name: String) {
+        val componentName = ComponentName(callManagerContext.packageName,
+            CallConnectionService::class.java.name)
+        val phoneAccountHandle = PhoneAccountHandle(componentName, "ConnectionServiceId")
+        val extras = Bundle()
+        extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
+        val test = Bundle()
+        extras.putString("NAME", name)
+        extras.putString("CALLERID", callId)
+        test.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
+        test.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_BIDIRECTIONAL)
+        test.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, extras)
+        try {
+            if (callManagerContext.checkSelfPermission(Manifest.permission.MANAGE_OWN_CALLS)
+                == PackageManager.PERMISSION_GRANTED) {
+                telecomManager.placeCall(Uri.parse(callId), test)
+            }
+        } catch (e: SecurityException) {
+            Toast.makeText(callManagerContext,"Error occurred:"+e.message,Toast.LENGTH_LONG).show()
         }
     }
 
