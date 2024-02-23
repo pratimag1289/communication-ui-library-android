@@ -266,6 +266,7 @@ class CallCompositeManager(private var applicationContext: Context?) : CallCompo
             .setupScreenOrientation(setupScreenOrientation)
             .callScreenOrientation(callScreenOrientation)
             .multitasking(CallCompositeMultitaskingOptions(true, true))
+            .displayLeaveCallConfirmation(SettingsFeatures.getDisplayLeaveCallConfirmationValue())
 
         locale.let {
             callCompositeBuilder.localization(

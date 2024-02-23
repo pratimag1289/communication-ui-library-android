@@ -80,7 +80,8 @@ internal class DependencyInjectionContainerHolder(
             ),
             container.networkManager,
             callType,
-            container.configuration.enableMultitasking
+            container.configuration.enableMultitasking,
+            container.configuration.displayLeaveCallConfirmation
         )
     }
 }

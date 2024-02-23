@@ -24,6 +24,7 @@ public final class CallCompositeBuilder {
     private CallCompositeTelecomOptions telecomOptions = null;
     private Boolean enableMultitasking = false;
     private Boolean enableSystemPiPWhenMultitasking = false;
+    private Boolean displayLeaveCallConfirmation = true;
 
     /**
      * Sets an optional theme for call-composite to use by {@link CallComposite}.
@@ -96,6 +97,18 @@ public final class CallCompositeBuilder {
         return this;
     }
 
+    /***
+     * While leaving a call, user will be shown a confirmation dialog before leaving the call.
+     *
+     * @param option Boolean value to enable or disable the confirmation dialog.
+     * @return {@link CallCompositeBuilder} for chaining options.
+     */
+    public CallCompositeBuilder displayLeaveCallConfirmation(
+            final Boolean option) {
+        this.displayLeaveCallConfirmation = option;
+        return this;
+    }
+
     /**
      * Builds the CallCompositeClass {@link CallComposite}.
      *
@@ -110,6 +123,7 @@ public final class CallCompositeBuilder {
         config.setTelecomOptions(this.telecomOptions);
         config.setEnableMultitasking(enableMultitasking);
         config.setEnableSystemPiPWhenMultitasking(enableSystemPiPWhenMultitasking);
+        config.setDisplayLeaveCallConfirmation(displayLeaveCallConfirmation);
         return new CallComposite(config);
     }
 }

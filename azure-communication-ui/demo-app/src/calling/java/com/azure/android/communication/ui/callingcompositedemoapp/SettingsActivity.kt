@@ -49,6 +49,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var setupScreenOrientationAutoCompleteTextView: AutoCompleteTextView
     private lateinit var callScreenOrientationArrayAdapter: ArrayAdapter<String>
     private lateinit var setupScreenOrientationArrayAdapter: ArrayAdapter<String>
+    private lateinit var displayLeaveCallConfirmationCheckBox: CheckBox
 
     private val sharedPreference by lazy {
         getSharedPreferences(SETTINGS_SHARED_PREFS, Context.MODE_PRIVATE)
@@ -122,6 +123,8 @@ class SettingsActivity : AppCompatActivity() {
         relaunchCompositeOnExitCheckbox()
 
         saveRenderedDisplayName()
+
+        updateDisplayLeaveCallConfirmationCheckbox()
 
         autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
             val selectedItem: String = supportedLanguages[position]
@@ -201,6 +204,12 @@ class SettingsActivity : AppCompatActivity() {
                         view.isChecked
                     ).apply()
                 }
+                R.id.display_leave_call_confirmation_check_box -> {
+                    sharedPreference.edit().putBoolean(
+                        DISPLAY_LEAVE_CALL_CONFIRMATION_VALUE,
+                        view.isChecked
+                    ).apply()
+                }
             }
         }
     }
@@ -231,6 +240,7 @@ class SettingsActivity : AppCompatActivity() {
         setupScreenOrientationAdapterLayout = findViewById(R.id.setup_screen_orientation_adapter_layout)
         callScreenOrientationAutoCompleteTextView = findViewById(R.id.call_screen_orientation_auto_complete_text_view)
         setupScreenOrientationAutoCompleteTextView = findViewById(R.id.setup_screen_orientation_auto_complete_text_view)
+        displayLeaveCallConfirmationCheckBox = findViewById(R.id.display_leave_call_confirmation_check_box)
 
         renderDisplayNameTextView.addTextChangedListener {
             saveRenderedDisplayName()
@@ -417,6 +427,14 @@ class SettingsActivity : AppCompatActivity() {
             LAUNCH_ON_EXIT_ON_BY_DEFAULT_VALUE
         )
     }
+
+    private fun updateDisplayLeaveCallConfirmationCheckbox() {
+        val isChecked = sharedPreference.getBoolean(
+            DISPLAY_LEAVE_CALL_CONFIRMATION_VALUE,
+            DEFAULT_DISPLAY_LEAVE_CALL_CONFIRMATION_VALUE
+        )
+        displayLeaveCallConfirmationCheckBox.isChecked = isChecked
+    }
 }
 
 // Shared pref Keys for language & rtl settings
@@ -455,6 +473,8 @@ const val TELECOM_MANAGER_VALUE_KEY = "TELECOM_MANAGER_VALUE_KEY"
 const val DEFAULT_TELECOM_MANAGER_VALUE = true
 const val REGISTER_PUSH_ON_EXIT_KEY = "REGISTER_PUSH_ON_EXIT_KEY"
 const val REGISTER_PUSH_ON_EXIT_VALUE = true
+const val DISPLAY_LEAVE_CALL_CONFIRMATION_VALUE = "DISPLAY_LEAVE_CALL_CONFIRMATION_VALUE_KEY"
+const val DEFAULT_DISPLAY_LEAVE_CALL_CONFIRMATION_VALUE = false
 
 const val CACHED_TOKEN = "CACHED_TOKEN"
 const val CACHED_USER_NAME = "CACHED_USER_NAME"

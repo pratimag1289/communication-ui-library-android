@@ -21,4 +21,5 @@ internal class CallCompositeConfiguration {
     var telecomOptions: CallCompositeTelecomOptions? = null
     var enableMultitasking: Boolean = false
     var enableSystemPiPWhenMultitasking: Boolean = false
+    var displayLeaveCallConfirmation: Boolean = true
 }
